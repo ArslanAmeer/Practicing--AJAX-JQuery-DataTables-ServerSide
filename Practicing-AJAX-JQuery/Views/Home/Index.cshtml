@@ -1,34 +1,64 @@
-﻿@model IEnumerable<Practicing_AJAX_JQuery.Models.Student>
-
-@{
+﻿@{
     ViewBag.Title = "Index";
 }
 
-<h2>Index</h2>
+<h2>Table data handling With AJAX</h2>
+<br />
 
-<p>
-</p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.Name)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.RegistrationNumb)
-        </th>
-    </tr>
+<div class="form-group">
+    <input type="text" id="id" class="form-control" placeholder="Id" disabled="disabled" />
+    <input type="text" id="name" class="form-control" placeholder="Name" /><br />
+    <input type="text" id="regNumb" class="form-control" placeholder="Registration Numb" /><br />
+    <button id="submit" type="submit" class="btn btn-primary">Submit</button>
+    <button id="update" type="submit" class="btn btn-primary">Update</button>
+</div>
 
-    @foreach (var item in Model)
-    {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.RegistrationNumb)
-            </td>
 
-        </tr>
-    }
-
+<table id="studTable" class="table table-bordered table-hover table-striped">
+    <tr><th><b>Name</b></th><th><b>Registration Numb</b></th><th>Actions</th></tr>
+    <tbody id="tbody"></tbody>
 </table>
+
+@section myScript {
+
+    <script type="text/javascript">
+
+        $(document).ready(() => {
+            GetData();
+        });
+
+        function GetData() {
+            $.ajax({
+                url: "/Home/GetData/",
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=UTF-8",
+                success: function (result) {
+                    if (!result.msg) {
+                        var newHtml = "";
+                        $.each(result,
+                            (name, value) => {
+                                newHtml += '<tr><td>' +
+                                    value.Name +
+                                    '</td><td>' +
+                                    value.RegistrationNumb +
+                                    '</td><td> <a href="#" id="edit" onclick="EditData(this)">Edit</a> | <a href="#" id="delete " onclick="DeleteData(' +
+                                    value.Id +
+                                    ')">Delete</a></td></tr>';
+                            });
+                        $("#studTable").children("#tbody").html(newHtml);
+
+                    } else {
+                        alert(result.msg);
+                    }
+
+                },
+                error: function (err) {
+                    alert("ERROR");
+                }
+            });
+        }
+
+    </script>
+
+}
