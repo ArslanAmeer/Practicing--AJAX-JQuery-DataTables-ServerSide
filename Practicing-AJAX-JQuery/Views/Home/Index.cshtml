@@ -13,17 +13,47 @@
 <h2>Table data handling With AJAX</h2>
 <br />
 
-<div class="form-group">
-    <input type="text" id="id" class="form-control" placeholder="Id" disabled="disabled" />
-    <input type="text" id="name" class="form-control" placeholder="Name" /><br />
-    <input type="text" id="regNumb" class="form-control" placeholder="Registration Numb" /><br />
-    <button id="submit" type="submit" class="btn btn-primary">Submit</button>
-    <button id="update" type="submit" class="btn btn-primary">Update</button>
+<div class="well">
+    <input type="text" id="id" class="form-control" placeholder="Id" disabled="disabled" style="display: none" />
+    <input type="text" id="name" class="form-control" placeholder="Name" style="display: inline" />
+    <input type="text" id="regNumb" class="form-control" placeholder="Registration Numb" style="display: inline" />
+    <hr />
+    <div class="alert alert-success alert-dismissible" role="alert" style="display: none">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <strong>SUCCESS! </strong><p style="display: inline" id="msg"> </p>
+    </div>
+    <button id="submit" type="submit" class="btn btn-primary">Add To Table</button>
+    <button id="update" type="submit" class="btn btn-primary" style="display: none">Update Data</button>
+    <button id="clear" type="button" class="btn btn-default" style="display: none">Cancel</button>
+    <button id="addToDb" type="submit" class="btn btn-primary">Add To DataBase</button>
 </div>
 
+@* ------ Temporary Table ------ *@
 
-<table id="studTable" class="table table-bordered table-hover table-striped">
-    <tr><th><b>Name</b></th><th><b>Registration Numb</b></th><th>Actions</th></tr>
+<table class="table table-bordered table-striped table-hover table-condensed" id="tempTable" style="display: none">
+    <thead>
+        <tr>
+            <th data-sortable="false">
+                Id
+            </th>
+            <th>
+                Name
+            </th>
+            <th>
+                Registration Numb
+            </th>
+            <th>
+                Actions
+            </th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+@* ------ Data from Database Table ------ *@
+
+<table id="studTable" class="table table-bordered table-striped table-hover table-condensed">
+    <tr><th><b>Id</b></th><th><b>Name</b></th><th><b>Registration Numb</b></th><th>Actions</th></tr>
     <tbody id="tbody"></tbody>
 </table>
 
@@ -50,6 +80,8 @@
                         $.each(result,
                             (name, value) => {
                                 newHtml += '<tr><td>' +
+                                    value.Id +
+                                    '</td><td>' +
                                     value.Name +
                                     '</td><td>' +
                                     value.RegistrationNumb +
@@ -70,21 +102,34 @@
             });
         }
 
+        // TEMPORARY Data Added to Table Before Adding them to Database ------------------------
+
         function AddTempData() {
+
             var name = $("#name").val();
             var regNumb = $("#regNumb").val();
-            var addHtml = " <tr><td>" +
+            $("#tempTable").show();
+
+
+            var addHtml = " <tr><td>null</td><td>" +
                 name +
                 "</td><td>" +
                 regNumb +
-                "</td><td> <a id='remove' href='#' onClick='RemoveTempData(this)'>Remove</a>";
-            $("#studTable tr:last").after(addHtml);
+                "</td><td> <a id='remove' href='#' onclick='RemoveTempData(this)'>Remove</a>";
+            $("#tempTable > tbody").append(addHtml);
+            $("#addToDb").prop("disabled", false);
+
         }
 
         function RemoveTempData(data) {
-            if (confirm("You Want to REMOVE?")) {
+            if (confirm('You Want to remove?')) {
                 $(data).parents('tr').remove();
+                var tRows = $("#tempTable > tbody tr");
+                if (tRows.length <= 0) {
+                    $("#tempTable").hide();
+                }
             }
+
         }
 
     </script>
