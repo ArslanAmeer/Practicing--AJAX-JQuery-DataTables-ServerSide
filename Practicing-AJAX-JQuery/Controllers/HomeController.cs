@@ -72,6 +72,25 @@ namespace Practicing_AJAX_JQuery.Controllers
             return Json(new { success = false, responseText = "Something Went Wrong!" }, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult DeleteStudent(int studentId)
+        {
+            StudentContextClass db = new StudentContextClass();
+            if (studentId != 0)
+            {
+                Student stu = (from s in db.Students where s.Id == studentId select s).FirstOrDefault();
+                if (stu != null)
+                {
+                    using (db)
+                    {
+                        db.Students.Remove(stu);
+                        db.SaveChanges();
+                    }
+
+                    return Json(new { success = true, responseText = "Data " + stu.Name + " Deleted from Database Succesfully!" }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            return Json(new { success = false, responseText = "Cannot Delete Data" }, JsonRequestBehavior.AllowGet);
+        }
 
     }
 }

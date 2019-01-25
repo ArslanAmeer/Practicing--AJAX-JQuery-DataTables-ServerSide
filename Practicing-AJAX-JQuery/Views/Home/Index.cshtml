@@ -65,7 +65,9 @@
 
             GetData();
 
-            // Adding Data To Temp Table
+            $("#addToDb").prop("disabled", true);
+
+            // Adding Data To Temp Table ------------------------
 
             $("#submit").click(() => {
                 AddTempData();
@@ -73,24 +75,14 @@
                 $("#regNumb").val("");
             });
 
-            // Adding Data to Database from Temp Table
+            // Adding Data to Database from Temp Table ------------------------
 
             $("#addToDb").click(() => {
                 var tRow = tempTableDataArry();
                 AddNewTableData(tRow);
             });
 
-            function tempTableDataArry() {
-                var studentArray = [];
-                $("#tempTable").find("tbody").find("tr").each(function () {
-                    var tempRow = [];
-                    tempRow[0] = $(this).find('td:eq(0)').text(); //  null for Id
-                    tempRow[1] = $(this).find('td:eq(1)').text(); // Name
-                    tempRow[2] = $(this).find('td:eq(2)').text(); // Registration Numb
-                    studentArray.push(tempRow);
-                });
-                return studentArray;
-            }
+
         });
 
         function GetData() {
@@ -152,10 +144,25 @@
                 var tRows = $("#tempTable > tbody tr");
                 if (tRows.length <= 0) {
                     $("#tempTable").hide();
+                    $("#addToDb").prop("disabled", true);
                 }
             }
 
         }
+
+        function tempTableDataArry() {
+            var studentArray = [];
+            $("#tempTable").find("tbody").find("tr").each(function () {
+                var tempRow = [];
+                tempRow[0] = $(this).find('td:eq(0)').text(); //  null for Id
+                tempRow[1] = $(this).find('td:eq(1)').text(); // Name
+                tempRow[2] = $(this).find('td:eq(2)').text(); // Registration Numb
+                studentArray.push(tempRow);
+            });
+            return studentArray;
+        }
+
+        // Adding Data To database From Temporarty DataTable ------------------------
 
         function AddNewTableData(tRow) {
             debugger;
@@ -173,6 +180,7 @@
                             $("#tempTable").hide();
                             $("#msg").html(response.responseText);
                             $(".alert-success").fadeIn(800).delay(5000).fadeOut('medium');
+                            GetData();
                             //BindDataTable();
                         } else {
                             alert(response.responseText);
@@ -182,6 +190,28 @@
                         alert("ERROR");
                     }
                 });
+        }
+
+        // Deleting Data from database/Table and update
+
+        function DeleteData(studentId) {
+
+            var sure = confirm("Do You Want To Delete This Record?");
+
+            if (sure) {
+                $.ajax({
+                    url: "/Home/DeleteStudent/?studentId=" + studentId,
+                    type: "GET",
+                    cache: false,
+                    success: function (result) {
+                        GetData();
+                    },
+                    error: function (errormessage) {
+                        alert(errormessage.responseText);
+                    }
+                });
+            }
+
         }
 
     </script>
