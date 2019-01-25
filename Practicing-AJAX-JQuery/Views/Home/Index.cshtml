@@ -69,12 +69,14 @@
 
             $("#submit").click(() => {
                 AddTempData();
+                $("#name").val("");
+                $("#regNumb").val("");
             });
 
             // Adding Data to Database from Temp Table
 
             $("#addToDb").click(() => {
-                tRow = tempTableDataArry();
+                var tRow = tempTableDataArry();
                 AddNewTableData(tRow);
             });
 
