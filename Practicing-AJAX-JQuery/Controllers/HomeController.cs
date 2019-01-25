@@ -19,9 +19,9 @@ namespace Practicing_AJAX_JQuery.Controllers
 
         public JsonResult GetData()
         {
-            StudentContextClass db = new StudentContextClass();
             try
             {
+                StudentContextClass db = new StudentContextClass();
                 using (db)
                 {
                     List<Student> students = (from s in db.Students select s).ToList();
@@ -29,14 +29,17 @@ namespace Practicing_AJAX_JQuery.Controllers
                     {
                         return Json(students, JsonRequestBehavior.AllowGet);
                     }
+                    else
+                    {
+                        return Json(new { msg = "No Data Found!", err = 1 }, JsonRequestBehavior.AllowGet);
+                    }
                 }
             }
             catch (Exception e)
             {
-                return Json(new { msg = "Cannot Fetch Data From Database. SERVER Error" }, JsonRequestBehavior.AllowGet);
+                return Json(new { msg = "Cannot Fetch Data From Database. SERVER Error", err = 1 }, JsonRequestBehavior.AllowGet);
             }
 
-            return null;
         }
 
         [HttpPost]

@@ -114,7 +114,7 @@
                 dataType: "json",
                 contentType: "application/json; charset=UTF-8",
                 success: function (result) {
-                    if (!result.msg) {
+                    if (!result.msg && result.err !== 0) {
                         var newHtml = "";
                         $.each(result,
                             (name, value) => {
@@ -130,13 +130,14 @@
                             });
                         $("#studTable").children("#tbody").html(newHtml);
 
-                    } else {
-                        alert(result.msg);
+                    } else if (result.err === 1) {
+                        $("#errmsg").html(result.msg);
+                        $(".alert-danger").fadeIn(800).delay(5000).fadeOut('medium');
                     }
-
                 },
                 error: function (err) {
-                    alert("ERROR");
+                    $("#errmsg").html(err);
+                    $(".alert-danger").fadeIn(800).delay(5000).fadeOut('medium');
                 }
             });
         }
