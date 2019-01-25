@@ -22,6 +22,10 @@
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <strong>SUCCESS! </strong><p style="display: inline" id="msg"> </p>
     </div>
+    <div class="alert alert-danger alert-dismissible" role="alert" style="display: none">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <strong>ERROR! </strong><p style="display: inline" id="errmsg"> </p>
+    </div>
     <button id="submit" type="submit" class="btn btn-primary">Add To Table</button>
     <button id="update" type="submit" class="btn btn-primary" style="display: none">Update Data</button>
     <button id="clear" type="button" class="btn btn-default" style="display: none">Cancel</button>
@@ -82,7 +86,25 @@
                 AddNewTableData(tRow);
             });
 
+            // Update Button to Update Student Data ------------------------
 
+            $("#update").click(() => {
+                var studentData = new Object();
+                studentData.Id = $("#id").val();
+                studentData.Name = $("#name").val();
+                studentData.RegistrationNumb = $("#regNumb").val();
+                UpdateData(studentData);
+            });
+
+            // Cancel Button to Update Data ------------------------
+
+            $("#clear").click(() => {
+                $("#update").hide();
+                $("#submit").show();
+                $("#addToDb").show();
+                $("input[type=text]").val("");
+                $("#clear").hide();
+            });
         });
 
         function GetData() {
@@ -183,7 +205,8 @@
                             GetData();
                             //BindDataTable();
                         } else {
-                            alert(response.responseText);
+                            $("#errmsgmsg").html(response.msg);
+                            $(".alert-danger").fadeIn(800).delay(5000).fadeOut('medium');
                         }
                     },
                     error: function (response) {
@@ -212,6 +235,55 @@
                 });
             }
 
+        }
+
+        function EditData(data) {
+            var id = $(data).closest('tr').find('td:eq(0)').text();
+            var name = $(data).closest('tr').find('td:eq(1)').text();
+            var regNumb = $(data).closest('tr').find('td:eq(2)').text();
+            $("#id").val(id);
+            $("#name").val(name);
+            $("#regNumb").val(regNumb);
+            $("#update").show().after('');
+            $("#submit").hide();
+            $("#addToDb").hide();
+            $("#clear").show();
+            $("#name").scrollIntoView();
+        }
+
+        function UpdateData(studentData) {
+
+            if (studentData != null) {
+                $.ajax({
+                    url: '/Home/UpdateStudent/',
+                    type: "POST",
+                    data: JSON.stringify(studentData),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (response) {
+                        if (response.err === 0) {
+                            //$("#studTable").DataTable().destroy();
+                            GetData();
+                            $("#clear").hide();
+                            $("#update").hide();
+                            $("#submit").show();
+                            $("#addToDb").show();
+                            $("input[type=text]").val("");
+                            $("#msg").html(response.msg);
+                            $(".alert-success").fadeIn(800).delay(5000).fadeOut('medium');
+                        } else {
+                            $("#errmsg").html(response.msg);
+                            $(".alert-danger").fadeIn(800).delay(5000).fadeOut('medium');
+                        }
+                    },
+                    failure: function (response) {
+                        alert(response.responseText);
+                    },
+                    error: function (response) {
+                        alert(response.responseText);
+                    }
+                });
+            }
         }
 
     </script>

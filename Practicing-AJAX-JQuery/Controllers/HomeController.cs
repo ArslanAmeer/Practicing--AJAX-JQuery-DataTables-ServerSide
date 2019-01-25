@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -92,5 +93,31 @@ namespace Practicing_AJAX_JQuery.Controllers
             return Json(new { success = false, responseText = "Cannot Delete Data" }, JsonRequestBehavior.AllowGet);
         }
 
+        [HttpPost]
+        public JsonResult UpdateStudent(Student student)
+        {
+            StudentContextClass db = new StudentContextClass();
+            try
+            {
+                using (db)
+                {
+                    Student oldStudent = db.Students.Find(student.Id);
+
+                    if (oldStudent != null)
+                    {
+                        oldStudent.Name = student.Name;
+                        oldStudent.RegistrationNumb = student.RegistrationNumb;
+
+                        db.Entry(oldStudent).State = EntityState.Modified;
+                        db.SaveChanges();
+                    }
+                    return Json(new { msg = "Successfully Update " + student.Name + " Data", err = 0 }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception e)
+            {
+                return Json(new { msg = "Cannot Update Data to Server! Try Again Later", err = 1 }, JsonRequestBehavior.AllowGet);
+            }
+        }
     }
 }
