@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using Practicing_AJAX_JQuery.Models;
+using VP_TestPro1.Controllers;
 
 namespace Practicing_AJAX_JQuery.Controllers
 {
@@ -39,6 +40,59 @@ namespace Practicing_AJAX_JQuery.Controllers
             {
                 return Json(new { msg = "Cannot Fetch Data From Database. SERVER Error", err = 1 }, JsonRequestBehavior.AllowGet);
             }
+
+        }
+
+        // Fully Server Sourced DataTable Workout
+
+        public JsonResult GetDataToDataTables(DataTablesParam param)
+        {
+
+            int pageNo = 1;
+            int totalCount = 0;
+
+            if (param.iDisplayStart >= param.iDisplayLength)
+            {
+                pageNo = (param.iDisplayStart / param.iDisplayLength) + 1;
+            }
+
+            StudentContextClass db = new StudentContextClass();
+            List<Student> list;
+            using (db)
+            {
+                if (param.sSearch != null)
+                {
+                    totalCount = (from s in db.Students.Where(x =>
+                            x.Name.Contains(param.sSearch) || x.RegistrationNumb.Contains(param.sSearch))
+                                  select s).Count();
+
+                    list = (from s in db.Students
+                            .Where(x => x.Name.Contains(param.sSearch) || x.RegistrationNumb.Contains(param.sSearch))
+                            .OrderBy(x => x.Id)
+                            .Skip((pageNo - 1) * param.iDisplayLength)
+                            .Take(param.iDisplayLength)
+                            select s).ToList();
+                }
+                else
+                {
+                    totalCount = db.Students.Count();
+                    list = (from s in db.Students
+                            .OrderBy(x => x.Id)
+                            .Skip((pageNo - 1) * param.iDisplayLength)
+                            .Take(param.iDisplayLength)
+                            select s).ToList();
+                }
+            }
+
+            return Json(new
+            {
+                aaData = list,
+                sEcho = param.sEcho,
+                iTotalDisplayRecords = totalCount,
+                iTotalRecords = totalCount
+
+            }
+                , JsonRequestBehavior.AllowGet);
 
         }
 
@@ -114,7 +168,7 @@ namespace Practicing_AJAX_JQuery.Controllers
                         db.Entry(oldStudent).State = EntityState.Modified;
                         db.SaveChanges();
                     }
-                    return Json(new { msg = "Successfully Update " + student.Name + " Data", err = 0 }, JsonRequestBehavior.AllowGet);
+                    return Json(new { msg = "Successfully Update <b><u>" + student.Name + "</u></b> Data", err = 0 }, JsonRequestBehavior.AllowGet);
                 }
             }
             catch (Exception e)

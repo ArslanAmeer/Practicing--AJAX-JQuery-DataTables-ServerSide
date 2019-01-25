@@ -10,7 +10,7 @@
     </style>
 }
 
-<h2>Table data handling With AJAX</h2>
+<h2 class="text-center text-primary">Table Data - CRUD - With AJAX</h2>
 <br />
 
 <div class="well">
@@ -57,8 +57,23 @@
 @* ------ Data from Database Table ------ *@
 
 <table id="studTable" class="table table-bordered table-striped table-hover table-condensed">
-    <tr><th><b>Id</b></th><th><b>Name</b></th><th><b>Registration Numb</b></th><th>Actions</th></tr>
-    <tbody id="tbody"></tbody>
+    <thead>
+        <tr>
+            <th data-sortable="false">
+                Id
+            </th>
+            <th>
+                Name
+            </th>
+            <th>
+                Registration Numb
+            </th>
+            <th>
+                Actions
+            </th>
+        </tr>
+    </thead>
+    <tbody></tbody>
 </table>
 
 @section myScript {
@@ -107,40 +122,42 @@
             });
         });
 
-        function GetData() {
-            $.ajax({
-                url: "/Home/GetData/",
-                type: "POST",
-                dataType: "json",
-                contentType: "application/json; charset=UTF-8",
-                success: function (result) {
-                    if (!result.msg && result.err !== 0) {
-                        var newHtml = "";
-                        $.each(result,
-                            (name, value) => {
-                                newHtml += '<tr><td>' +
-                                    value.Id +
-                                    '</td><td>' +
-                                    value.Name +
-                                    '</td><td>' +
-                                    value.RegistrationNumb +
-                                    '</td><td> <a href="#" id="edit" onclick="EditData(this)">Edit</a> | <a href="#" id="delete " onclick="DeleteData(' +
-                                    value.Id +
-                                    ')">Delete</a></td></tr>';
-                            });
-                        $("#studTable").children("#tbody").html(newHtml);
+        // Direct Function To Get Data into Simple Table (DataTables At The End)
 
-                    } else if (result.err === 1) {
-                        $("#errmsg").html(result.msg);
-                        $(".alert-danger").fadeIn(800).delay(5000).fadeOut('medium');
-                    }
-                },
-                error: function (err) {
-                    $("#errmsg").html(err);
-                    $(".alert-danger").fadeIn(800).delay(5000).fadeOut('medium');
-                }
-            });
-        }
+        // function GetData() {
+        //    $.ajax({
+        //        url: "/Home/GetData/",
+        //        type: "POST",
+        //        dataType: "json",
+        //        contentType: "application/json; charset=UTF-8",
+        //        success: function (result) {
+        //            if (!result.msg && result.err !== 0) {
+        //                var newHtml = "";
+        //                $.each(result,
+        //                    (name, value) => {
+        //                        newHtml += '<tr><td>' +
+        //                            value.Id +
+        //                            '</td><td>' +
+        //                            value.Name +
+        //                            '</td><td>' +
+        //                            value.RegistrationNumb +
+        //                            '</td><td> <a href="#" id="edit" onclick="EditData(this)">Edit</a> | <a href="#" id="delete " onclick="DeleteData(' +
+        //                            value.Id +
+        //                            ')">Delete</a></td></tr>';
+        //                    });
+        //                $("#studTable").children("#tbody").html(newHtml);
+
+        //            } else if (result.err === 1) {
+        //                $("#errmsg").html(result.msg);
+        //                $(".alert-danger").fadeIn(800).delay(5000).fadeOut('medium');
+        //            }
+        //        },
+        //        error: function (err) {
+        //            $("#errmsg").html(err);
+        //            $(".alert-danger").fadeIn(800).delay(5000).fadeOut('medium');
+        //        }
+        //    });
+        //}
 
         // TEMPORARY Data Added to Table Before Adding them to Database ------------------------
 
@@ -216,7 +233,7 @@
                 });
         }
 
-        // Deleting Data from database/Table and update
+        // Deleting Data from database/Table ------------------------
 
         function DeleteData(studentId) {
 
@@ -249,8 +266,10 @@
             $("#submit").hide();
             $("#addToDb").hide();
             $("#clear").show();
-            $("#name").scrollIntoView();
+            $("#name")[0].scrollIntoView();
         }
+
+        // Updating Specific Data to database/Table and Update ------------------------
 
         function UpdateData(studentData) {
 
@@ -283,6 +302,52 @@
                     error: function (response) {
                         alert(response.responseText);
                     }
+                });
+            }
+        }
+
+        // Getting Data from Server Into DataTables (Fully Server Side Functionality)
+
+        var oTable;
+        var GetData = function (response) {
+            debugger;
+            if ($.fn.DataTable.isDataTable("#studTable")) {
+                oTable.draw();
+            }
+            else {
+
+                oTable = $("#studTable").DataTable({
+                    "bServerSide": true,
+                    "bSort": false,
+                    "bPaginate": true,
+                    "bProcessing": true,
+                    "sAjaxSource": "/Home/GetDataToDataTables",
+                    "fnServerData": function (sSource, aoData, fnCallback) {
+
+                        $.ajax({
+                            type: "POST",
+                            data: aoData,
+                            url: sSource,
+                            success: fnCallback
+                        });
+
+                    },
+                    "aoColumns": [
+                        {
+                            "mData": "Id",
+                            "width": "30px"
+                        },
+                        { "mData": "Name" },
+                        { "mData": "RegistrationNumb" },
+                        {
+                            "mData": "Id",
+                            "render": function (id, type, full, meta) {
+                                return '<a href="#" onclick="EditData(this)">Edit</a> | <a href="#" onclick="DeleteData(' +
+                                    id +
+                                    ')">Delete</a>';
+                            }
+                        }
+                    ]
                 });
             }
         }
